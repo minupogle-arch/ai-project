@@ -1,119 +1,78 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-import random
 
-# 페이지 설정
-st.set_page_config(page_title="서울 관광지도", page_icon="🗺️", layout="wide")
+st.set_page_config(page_title="서울 관광일정 플래너", page_icon="🗺️", layout="wide")
 
-# 제목
-st.title("🗺️ 외국인이 좋아하는 서울 주요 관광지 Top 10")
-st.write("서울의 대표 관광지 10곳을 지도에서 확인하고, 여행 일정을 만들어보세요! 🔴")
+st.title("🗺️ 외국인이 좋아하는 서울 관광지 여행 플래너")
+st.write("서울의 대표 관광지 10곳을 시간대별로 여행해보세요! 🍱🌇✨")
 
-# 지도 설정
+# 지도 생성
 m = folium.Map(location=[37.5665, 126.9780], zoom_start=12)
 
-# 관광지 데이터 (한국어 설명 + 지하철 정보)
-tourist_spots = [
-    {
-        "name": "경복궁",
-        "lat": 37.579617, "lon": 126.977041,
-        "desc": "조선 왕조의 법궁으로, 아름다운 건축미와 역사적 가치가 높은 서울의 대표 명소입니다.",
-        "subway": "🚇 3호선 경복궁역"
-    },
-    {
-        "name": "명동",
-        "lat": 37.563757, "lon": 126.982682,
-        "desc": "서울의 중심 번화가로, 쇼핑과 길거리 음식이 가득한 활기찬 거리입니다.",
-        "subway": "🚇 4호선 명동역"
-    },
-    {
-        "name": "남산타워",
-        "lat": 37.551169, "lon": 126.988227,
-        "desc": "서울 전경을 한눈에 볼 수 있는 전망대이자 사랑의 자물쇠 명소로 유명합니다.",
-        "subway": "🚇 4호선 명동역"
-    },
-    {
-        "name": "홍대",
-        "lat": 37.556327, "lon": 126.922965,
-        "desc": "젊음과 예술이 공존하는 거리로, 버스킹과 개성 넘치는 상점이 즐비한 지역입니다.",
-        "subway": "🚇 2호선 홍대입구역"
-    },
-    {
-        "name": "인사동",
-        "lat": 37.574012, "lon": 126.984919,
-        "desc": "전통 찻집과 공예품 가게가 가득한 서울의 대표 전통문화 거리입니다.",
-        "subway": "🚇 3호선 안국역"
-    },
-    {
-        "name": "동대문디자인플라자(DDP)",
-        "lat": 37.566479, "lon": 127.009135,
-        "desc": "미래지향적 디자인의 복합문화공간으로, 전시와 패션쇼가 자주 열리는 명소입니다.",
-        "subway": "🚇 2·4·5호선 동대문역사문화공원역"
-    },
-    {
-        "name": "이태원",
-        "lat": 37.534531, "lon": 126.994153,
-        "desc": "다양한 나라의 음식과 문화가 공존하는 서울의 대표 외국인 거리입니다.",
-        "subway": "🚇 6호선 이태원역"
-    },
-    {
-        "name": "북촌한옥마을",
-        "lat": 37.582604, "lon": 126.983998,
-        "desc": "조선시대 한옥이 잘 보존된 전통 마을로, 골목마다 아름다운 풍경이 펼쳐집니다.",
-        "subway": "🚇 3호선 안국역"
-    },
-    {
-        "name": "롯데월드타워",
-        "lat": 37.513068, "lon": 127.102493,
-        "desc": "123층 초고층 타워로, 전망대와 쇼핑몰, 수족관 등을 갖춘 복합시설입니다.",
-        "subway": "🚇 2·8호선 잠실역"
-    },
-    {
-        "name": "청계천",
-        "lat": 37.569713, "lon": 126.989317,
-        "desc": "도심 속을 흐르는 하천으로, 산책로와 야경이 아름다운 도심 휴식 공간입니다.",
-        "subway": "🚇 1호선 종각역"
-    },
+# 관광지 데이터
+spots = [
+    {"name": "경복궁", "lat": 37.579617, "lon": 126.977041, "desc": "조선 왕조의 법궁으로, 전통 건축미와 역사적 가치가 높은 서울의 대표 명소.", "subway": "🚇 3호선 경복궁역"},
+    {"name": "북촌한옥마을", "lat": 37.582604, "lon": 126.983998, "desc": "조선시대 한옥이 보존된 전통 마을로, 골목마다 아름다운 풍경이 이어집니다.", "subway": "🚇 3호선 안국역"},
+    {"name": "인사동", "lat": 37.574012, "lon": 126.984919, "desc": "전통 찻집과 공예품 가게가 많은 서울의 대표 전통거리.", "subway": "🚇 3호선 안국역"},
+    {"name": "명동", "lat": 37.563757, "lon": 126.982682, "desc": "서울의 중심 쇼핑거리로, 패션과 화장품, 길거리 음식이 가득합니다.", "subway": "🚇 4호선 명동역"},
+    {"name": "남산타워", "lat": 37.551169, "lon": 126.988227, "desc": "서울 전경을 한눈에 볼 수 있는 랜드마크 전망대.", "subway": "🚇 4호선 명동역"},
+    {"name": "청계천", "lat": 37.569713, "lon": 126.989317, "desc": "도심 속 산책로로, 낮과 밤 모두 아름다운 서울의 힐링 명소.", "subway": "🚇 1호선 종각역"},
+    {"name": "동대문디자인플라자(DDP)", "lat": 37.566479, "lon": 127.009135, "desc": "미래적인 곡선 디자인이 돋보이는 복합문화공간.", "subway": "🚇 2·4·5호선 동대문역사문화공원역"},
+    {"name": "이태원", "lat": 37.534531, "lon": 126.994153, "desc": "다국적 음식과 문화가 공존하는 서울의 글로벌 거리.", "subway": "🚇 6호선 이태원역"},
+    {"name": "홍대", "lat": 37.556327, "lon": 126.922965, "desc": "젊음과 예술의 거리로, 음악과 개성 있는 상점이 가득합니다.", "subway": "🚇 2호선 홍대입구역"},
+    {"name": "롯데월드타워", "lat": 37.513068, "lon": 127.102493, "desc": "123층 초고층 빌딩으로, 전망대와 쇼핑몰, 수족관이 있는 복합 명소.", "subway": "🚇 2·8호선 잠실역"},
 ]
 
-# 지도에 마커 추가 (빨간색)
-for spot in tourist_spots:
+# 마커 추가
+for s in spots:
     folium.Marker(
-        [spot["lat"], spot["lon"]],
-        popup=f"<b>{spot['name']}</b><br>{spot['desc']}<br>{spot['subway']}",
-        tooltip=spot["name"],
+        [s["lat"], s["lon"]],
+        popup=f"<b>{s['name']}</b><br>{s['desc']}<br>{s['subway']}",
+        tooltip=s["name"],
         icon=folium.Icon(color="red", icon="info-sign"),
     ).add_to(m)
 
-# 지도 출력 (크기 조절)
 st_data = st_folium(m, width=700, height=420)
 
-# 관광지 요약 정보
 st.markdown("---")
 st.subheader("📍 관광지 요약 정보")
+for i, s in enumerate(spots, start=1):
+    st.markdown(f"**{i}. {s['name']}** — {s['desc']}  \n{subway:=s['subway']}")
 
-for i, spot in enumerate(tourist_spots, start=1):
-    st.markdown(f"**{i}. {spot['name']}** — {spot['desc']}  \n{subway:=spot['subway']}")
-
-# 날짜 선택 슬라이더
+# 날짜 선택
 st.markdown("---")
 st.subheader("🗓️ 여행 일정 만들기")
 day = st.slider("여행할 날짜를 선택하세요 (1일차~3일차)", 1, 3, 1)
+st.write(f"### 📅 {day}일차 일정")
 
-st.write(f"### 📅 {day}일차 추천 일정")
+# 이동 동선 고려 (가까운 지역끼리 묶기)
+routes = {
+    1: ["경복궁", "북촌한옥마을", "인사동", "명동", "남산타워"],
+    2: ["청계천", "동대문디자인플라자(DDP)", "이태원", "홍대", "남산타워"],
+    3: ["롯데월드타워", "잠실 근처 쇼핑", "이태원", "명동", "청계천"]
+}
 
-# 일정 구성 (랜덤 분배)
-random.seed(42)
-itinerary = tourist_spots.copy()
-random.shuffle(itinerary)
-schedule = {1: itinerary[:4], 2: itinerary[4:7], 3: itinerary[7:]}
+# 시간대별 일정 구성
+def make_schedule(day):
+    route = routes[day]
+    schedule = [
+        {"time": "🌅 오전 09:00", "activity": f"{route[0]} — 아침 산책 및 관광"},
+        {"time": "🕙 오전 10:30", "activity": f"{route[1]} — 문화 체험 및 포토타임"},
+        {"time": "🍜 12:30", "activity": "점심식사 — 근처 맛집에서 한식 또는 분식 즐기기"},
+        {"time": "🌇 오후 14:00", "activity": f"{route[2]} — 거리 구경 및 쇼핑"},
+        {"time": "☕ 오후 16:00", "activity": f"{route[3]} — 카페 타임 및 휴식"},
+        {"time": "🍲 18:30", "activity": "저녁식사 — 지역 대표 음식 맛보기"},
+        {"time": "🌙 오후 20:00", "activity": f"{route[4]} — 야경 감상 및 자유시간"},
+    ]
+    return schedule
 
-# 일정 출력
-for i, spot in enumerate(schedule[day], start=1):
-    st.markdown(f"**{i}. {spot['name']}** — {spot['desc']}  \n{subway:=spot['subway']}")
+# 일정 표시
+schedule = make_schedule(day)
+for item in schedule:
+    st.markdown(f"**{item['time']}** — {item['activity']}")
 
-# 코드 보기나 requirement 노출 안 되게 처리
+# 불필요한 UI 숨기기
 st.markdown(
     """
     <style>
@@ -124,4 +83,5 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
