@@ -1,5 +1,5 @@
-# Streamlit page: 2025년 10월 하루 & 호선별 역 순위(승차+하차)
-# 파일 위치: pages/11_subway_plotly_ranking.py
+# pages/04_지하철분석.py
+# Streamlit page: 2025년 10월 하루 & 호선별 역 순위(Plotly)
 # CSV 파일은 루트 폴더에 `BBUU109커하.csv`로 놓아주세요.
 
 import streamlit as st
@@ -7,9 +7,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import date
 from pathlib import Path
-import math
 
-st.set_page_config(page_title="역별 승하차 합계 랭킹", layout="wide")
+st.set_page_config(page_title="역별 승하차 합계 랭킹 (10월)", layout="wide")
 
 st.title("📊 2025년 10월 — 호선별 역별 승·하차 합계 랭킹 (Plotly)")
 st.markdown("CSV는 루트 폴더의 `BBUU109커하.csv`를 사용합니다.")
@@ -34,20 +33,20 @@ def load_data(path: Path):
 df = load_data(DATA_PATH)
 
 # 2025-10-01 ~ 2025-10-30 필터
-valid_start = date(2025, 11, 1)
-valid_end = date(2025, 11, 30)
+valid_start = date(2025, 10, 1)
+valid_end = date(2025, 10, 30)
 
 # 사이드바: 날짜, 호선, top N
 st.sidebar.header("필터")
-selected_date = st.sidebar.date_input("날짜 선택 (2025년 11월)", value=valid_start, min_value=valid_start, max_value=valid_end)
+selected_date = st.sidebar.date_input("날짜 선택 (2025년 10월)", value=valid_start, min_value=valid_start, max_value=valid_end)
 
 # 노선 목록은 해당 월 데이터 기준으로 제공
 df_oct = df[(df['date'] >= valid_start) & (df['date'] <= valid_end)].copy()
-if df_nov.empty:
-    st.warning("데이터에 2025년 11월 범위의 행이 없습니다.")
+if df_oct.empty:
+    st.warning("데이터에 2025년 10월 범위의 행이 없습니다.")
     st.stop()
 
-lines = sorted(df_nov['노선명'].dropna().unique().tolist())
+lines = sorted(df_oct['노선명'].dropna().unique().tolist())
 lines.insert(0, '전체')
 selected_line = st.sidebar.selectbox("호선 선택", options=lines, index=0)
 
@@ -122,5 +121,6 @@ with st.expander("상세표 보기 (역명, 합계, 순위)"):
     st.dataframe(agg[['rank','역명','total']].head(500).style.format({'total':'{:,}'}))
 
 st.markdown("---")
-st.caption("코드: pages/11_subway_plotly_ranking.py  |  CSV: 루트/BBUU109커하.csv")
+st.caption("코드: pages/04_지하철분석.py  |  CSV: 루트/BBUU109커하.csv")
+
 
