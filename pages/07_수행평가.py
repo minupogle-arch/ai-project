@@ -75,15 +75,11 @@ for i, row in rec.iterrows():
     st.write("---")
 
 # -------------------------------
-# 6) 레이더 차트 시각화 (한글 폰트 적용 + 깨짐 방지)
+# 6) 레이더 차트 시각화 (영어 라벨, 깨짐 방지)
 # -------------------------------
-st.subheader("📊 추천 디저트 맛 프로필 비교")
+st.subheader("📊 Recommended Dessert Taste Profile Comparison")
 
-# 🔥 한글 폰트 문제 해결
-plt.rcParams["font.family"] = "Malgun Gothic"   # 윈도우
-plt.rcParams["axes.unicode_minus"] = False
-
-labels = ["당도", "부드러움", "쫀득함", "온도(따뜻함)"]
+labels = ["Sweetness", "Softness", "Chewiness", "Temperature"]
 num_vars = len(labels)
 
 angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
@@ -98,13 +94,13 @@ for _, row in rec.iterrows():
     ax.plot(angles, values, linewidth=2)
     ax.fill(angles, values, alpha=0.15, label=row["dessert"])
 
-# 축 라벨 수정 (깨짐 방지)
+# 축 라벨 영어로
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(labels, fontsize=12)
 
 # y축 제거 (깔끔)
 ax.set_yticklabels([])
-ax.set_title("추천 디저트 맛 레이더 차트", fontsize=14)
+ax.set_title("Recommended Dessert Taste Radar Chart", fontsize=14)
 
 ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.15))
 
