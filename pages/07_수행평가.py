@@ -75,7 +75,7 @@ for i, row in rec.iterrows():
     st.write("---")
 
 # -------------------------------
-# 6) 레이더 차트 시각화 (영어 라벨, 깨짐 방지)
+# 6) 레이더 차트 시각화 (범례 영어, 안정적)
 # -------------------------------
 st.subheader("📊 Recommended Dessert Taste Profile Comparison")
 
@@ -87,18 +87,21 @@ angles += angles[:1]
 
 fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
 
-for _, row in rec.iterrows():
+# 범례용 영어 이름 리스트
+legend_names = rec["dessert"].tolist()  # 디저트 이름 그대로 영어로 바꾸려면 여기 수정 가능
+
+for i, (_, row) in enumerate(rec.iterrows()):
     values = [row["sweet"], row["soft"], row["chewy"], row["temp"]]
     values += values[:1]
 
     ax.plot(angles, values, linewidth=2)
-    ax.fill(angles, values, alpha=0.15, label=row["dessert"])
+    ax.fill(angles, values, alpha=0.15, label=f"Dessert {i+1}")  # 범례 영어로 표시
 
-# 축 라벨 영어로
+# 축 라벨
 ax.set_xticks(angles[:-1])
 ax.set_xticklabels(labels, fontsize=12)
 
-# y축 제거 (깔끔)
+# y축 제거
 ax.set_yticklabels([])
 ax.set_title("Recommended Dessert Taste Radar Chart", fontsize=14)
 
