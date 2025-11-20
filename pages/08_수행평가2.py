@@ -37,32 +37,49 @@ else:
     top10 = df.sort_values(by=target_col, ascending=False).head(10)
 
     # -------------------------------
-    # matplotlib 폰트 설정 (영어 글씨 깨짐 방지)
+    # matplotlib 폰트 및 스타일 설정
     # -------------------------------
-    matplotlib.rcParams['font.family'] = 'DejaVu Sans'  # 영어 기본 글꼴 명시
+    matplotlib.rcParams['font.family'] = 'DejaVu Sans'
     matplotlib.rcParams['axes.labelsize'] = 12
     matplotlib.rcParams['xtick.labelsize'] = 10
     matplotlib.rcParams['ytick.labelsize'] = 10
+    plt.style.use('seaborn-whitegrid')  # 깔끔한 배경
+
+    # -------------------------------
+    # 색상 설정: 최고값 빨강, 나머지 파랑 그라데이션
+    # -------------------------------
+    max_index = top10[target_col].idxmax()
+    colors = []
+    for idx in top10.index:
+        if idx == max_index:
+            colors.append('red')
+        else:
+            colors.append(cm.Blues_r(top10.index.get_loc(idx)/10))  # 0~1 비율
 
     # -------------------------------
     # 막대그래프 그리기
     # -------------------------------
     fig, ax = plt.subplots(figsize=(10,6))
-    
-    # 파란색 그라데이션
-    colors = cm.Blues_r([i/10 for i in range(10)])
-    ax.bar(top10.index.astype(str), top10[target_col], color=colors)
-    
+    bars = ax.bar(top10.index.astype(str), top10[target_col], color=colors)
+
     # x축, y축 라벨
     ax.set_xlabel("Index")
-    ax.set_ylabel("target_col")
-    
+    ax.set_ylabel(target_col)
+
     # x축 글씨 회전
     ax.tick_params(axis='x', rotation=45)
 
-    # 제목 제거 (깨짐 방지)
-    # ax.set_title(...) 삭제
+    # 막대 위에 값 표시
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height:.1f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0,3),  # 위로 3pt
+                    textcoords="offset points",
+                    ha='center', va='bottom',
+                    fontsize=10)
 
     plt.tight_layout()
     st.pyplot(fig)
+
 
