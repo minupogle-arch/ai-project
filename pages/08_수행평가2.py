@@ -43,7 +43,9 @@ else:
     matplotlib.rcParams['axes.labelsize'] = 12
     matplotlib.rcParams['xtick.labelsize'] = 10
     matplotlib.rcParams['ytick.labelsize'] = 10
-    plt.style.use('seaborn-whitegrid')  # 깔끔한 배경
+    matplotlib.rcParams['axes.facecolor'] = '#f5f5f5'  # 배경색
+    matplotlib.rcParams['axes.grid'] = True
+    matplotlib.rcParams['grid.color'] = 'white'
 
     # -------------------------------
     # 색상 설정: 최고값 빨강, 나머지 파랑 그라데이션
@@ -54,7 +56,7 @@ else:
         if idx == max_index:
             colors.append('red')
         else:
-            colors.append(cm.Blues_r(top10.index.get_loc(idx)/10))  # 0~1 비율
+            colors.append(cm.Blues_r(top10.index.get_loc(idx)/10))
 
     # -------------------------------
     # 막대그래프 그리기
@@ -74,7 +76,7 @@ else:
         height = bar.get_height()
         ax.annotate(f'{height:.1f}',
                     xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0,3),  # 위로 3pt
+                    xytext=(0,3),
                     textcoords="offset points",
                     ha='center', va='bottom',
                     fontsize=10)
