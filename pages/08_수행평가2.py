@@ -66,7 +66,7 @@ else:
 
     # x축, y축 라벨
     ax.set_xlabel("Index")
-    ax.set_ylabel(target_col)
+    ax.set_ylabel("target_col")
 
     # x축 글씨 회전
     ax.tick_params(axis='x', rotation=45)
