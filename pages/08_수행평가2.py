@@ -1,99 +1,58 @@
-# pages/Weather_Analysis.py
 import streamlit as st
 import pandas as pd
-from pathlib import Path
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
 
-st.set_page_config(page_title="Weather Analysis", layout="wide")
-st.title("Weather Data — 분석 도구 (CSV: PLAVEPLBBUU.csv)")
+st.set_page_config(page_title="Weather Analysis")
 
-@st.cache_data(show_spinner=False)
-def load_data(path: str):
-    encodings = ["utf-8", "cp949", "euc-kr", "latin1"]
-    last_err = None
-    for enc in encodings:
-        try:
-            df = pd.read_csv(path, encoding=enc, low_memory=False)
-            return df, enc
-        except Exception as e:
-            last_err = e
-            continue
-    raise ValueError(f"CSV 파일을 읽을 수 없습니다. 마지막 에러: {last_err}")
+st.title("🌡️ 기상청 데이터 상세 분석")
 
-CSV_FILENAME = "PLAVEPLBBUU.csv"
-csv_path = Path(CSV_FILENAME)
+# -------------------------------
+# 🔥 한글 폰트 자동 다운로드 + 등록
+# -------------------------------
 
-if not csv_path.exists():
-    st.error(f"루트 폴더에 `{CSV_FILENAME}` 파일이 없습니다. 업로드했는지 확인하세요.")
+FONT_PATH = "/tmp/NanumGothic.ttf"
+
+# 폰트 없으면 자동 다운로드
+if not os.path.exists(FONT_PATH):
+    import urllib.request
+    url = "https://github.com/naver/nanumfont/releases/download/v1.0/NanumGothic.ttf"
+    urllib.request.urlretrieve(url, FONT_PATH)
+
+# matplotlib 폰트 설정
+fm.fontManager.addfont(FONT_PATH)
+plt.rc('font', family='NanumGothic')
+
+# -------------------------------
+
+# CSV 로드
+try:
+    df = pd.read_csv("kma_weather.csv", encoding="cp949")
+except:
+    st.error("CSV 파일 로드 실패. 루트 폴더에 kma_weather.csv 가 필요합니다.")
     st.stop()
 
-# Load
-with st.spinner("CSV 로드 중..."):
-    df, used_encoding = load_data(str(csv_path))
+st.subheader("데이터 미리보기")
+st.dataframe(df.head())
 
-# Sidebar controls
-st.sidebar.markdown("## 옵션")
-view = st.sidebar.radio("보여줄 내용 선택", ("데이터 미리보기", "기본 통계", "결측치 요약", "막대그래프 (탑값)", "컬럼 설명"))
+# 수치형 컬럼 찾기
+numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
 
-if view == "데이터 미리보기":
-    n = st.sidebar.slider("행 개수", min_value=5, max_value=200, value=10)
-    st.markdown(f"**인코딩(자동탐지)**: `{used_encoding}`")
-    st.dataframe(df.head(n))
-
-elif view == "기본 통계":
-    st.write("### 기본 통계 (수치형 + 범주형)")
-    try:
-        st.write(df.describe(include='all'))
-    except Exception as e:
-        st.error(f"통계 요약 생성 중 오류: {e}")
-
-elif view == "결측치 요약":
-    st.write("### 컬럼별 결측치 수")
-    missing = df.isna().sum().sort_values(ascending=False)
-    st.write(missing[missing > 0])
-
-elif view == "컬럼 설명":
-    st.write("### 컬럼 목록 및 타입")
-    info = pd.DataFrame({
-        "column": df.columns,
-        "dtype": df.dtypes.astype(str),
-        "non_null_count": df.notna().sum().values
-    })
-    st.dataframe(info)
-
+if len(numeric_cols) == 0:
+    st.error("그래프를 그릴 수 있는 숫자형 칼럼이 없습니다.")
 else:
-    # Bar chart view
-    st.write("### 막대그래프 — 컬럼 선택 후 Top N 표시")
-    # Determine categorical cols
-    cat_cols = df.select_dtypes(include=['object','category']).columns.tolist()
-    num_cols = df.select_dtypes(include=['number']).columns.tolist()
+    target_col = numeric_cols[0]
 
-    if cat_cols:
-        col = st.selectbox("범주형 컬럼 선택", cat_cols, index=0)
-        topn = st.number_input("Top N", min_value=3, max_value=50, value=10)
-        vc = df[col].fillna("N/A").value_counts().nlargest(topn)
-        st.write(f"**컬럼**: {col} — 상위 {topn} 값")
-        fig, ax = plt.subplots(figsize=(10,5))
-        vc.plot(kind='bar', ax=ax)
-        ax.set_xlabel(col)
-        ax.set_ylabel("count")
-        ax.set_title(f"Top {topn} value counts of '{col}'")
-        plt.tight_layout()
-        st.pyplot(fig)
-    elif num_cols:
-        col = st.selectbox("숫자형 컬럼 선택 (binned 분포)", num_cols, index=0)
-        bins = st.slider("Binning 구간 수", min_value=5, max_value=50, value=10)
-        binned = pd.cut(df[col].dropna(), bins=bins).value_counts().sort_index()
-        st.write(f"**컬럼**: {col} — {bins}구간 분포")
-        fig, ax = plt.subplots(figsize=(10,5))
-        binned.plot(kind='bar', ax=ax)
-        ax.set_xlabel(col)
-        ax.set_ylabel("count")
-        ax.set_title(f"Binned distribution of '{col}'")
-        plt.tight_layout()
-        st.pyplot(fig)
-    else:
-        st.write("그래프를 그릴 수 있는 적절한 컬럼이 없습니다.")
+    st.subheader(f"📊 막대그래프: {target_col} 기준 상위 10개")
 
-st.markdown("---")
-st.write("앱: 자동 생성된 분석 도구. 추가 기능이나 특정 시각화 원하면 알려줘.")
+    top10 = df.sort_values(by=target_col, ascending=False).head(10)
+
+    fig, ax = plt.subplots()
+    ax.bar(top10.index.astype(str), top10[target_col])
+    ax.set_xlabel("인덱스")
+    ax.set_ylabel(target_col)
+    ax.set_title(f"{target_col} 기준 상위 10개")
+
+    st.pyplot(fig)
+
