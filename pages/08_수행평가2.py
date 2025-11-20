@@ -44,12 +44,16 @@ else:
     colors = cm.Blues_r([i/10 for i in range(10)])  # 0~1 비율
     ax.bar(top10.index.astype(str), top10[target_col], color=colors)
     
+    # x축, y축 라벨
     ax.set_xlabel("Index", fontsize=12)
     ax.set_ylabel(target_col, fontsize=12)
-    ax.set_title(f"Top 10 by {target_col}", fontsize=14)
-    ax.tick_params(axis='x', rotation=45)
+    
+    # y축 글씨 깨짐 최소화
+    ax.tick_params(axis='y', labelsize=10)
+    ax.tick_params(axis='x', rotation=45, labelsize=10)
+
+    # 그래프 제목 제거
+    # ax.set_title(...) 삭제
 
     plt.tight_layout()
     st.pyplot(fig)
-
-
